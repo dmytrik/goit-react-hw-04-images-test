@@ -1,4 +1,6 @@
 import React, { Component } from 'react';
+import { GalleryList, GalleryItem } from './ImageGallery.styled';
+import ImageGalleryItem from 'components/ImageGalleryItem/ImageGalleryItem';
 
 class ImageGallery extends Component {
   static API_KEY = '28811056-f3e78fd673175542d7021b7d4';
@@ -17,8 +19,7 @@ class ImageGallery extends Component {
         )
           .then(res => res.json())
           .then(res => {
-            this.setState({ status: 'resolved' });
-            this.setState({ images: res.hits });
+            this.setState({ status: 'resolved', images: res.hits });
           });
       }, 2000);
     }
@@ -35,11 +36,19 @@ class ImageGallery extends Component {
     }
 
     if (status === 'rejected') {
-      return <p>помилка</p>;
+      return <p>Помилка</p>;
     }
 
     if (status === 'resolved') {
-      return <p>все ок</p>;
+      return (
+        <GalleryList>
+          {this.state.images.map(({ id, webformatURL, tags }) => (
+            <GalleryItem key={id}>
+              <ImageGalleryItem webformatURL={webformatURL} tags={tags} />
+            </GalleryItem>
+          ))}
+        </GalleryList>
+      );
     }
   }
 }
