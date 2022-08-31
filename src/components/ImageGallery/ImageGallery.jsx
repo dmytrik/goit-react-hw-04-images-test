@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { GalleryList, GalleryItem } from './ImageGallery.styled';
 import ImageGalleryItem from 'components/ImageGalleryItem/ImageGalleryItem';
 import LoadMore from 'components/LoadMore/LoadMore';
+import Loader from 'components/Loader/Loader';
 
 class ImageGallery extends Component {
   static API_KEY = '28811056-f3e78fd673175542d7021b7d4';
@@ -10,11 +11,13 @@ class ImageGallery extends Component {
     images: [],
     status: 'idle',
     currentPage: 1,
+    isLoader: false,
+    error: null,
   };
 
   componentDidUpdate(prevProps, prevState) {
     if (prevProps.searchName !== this.props.searchName) {
-      this.setState({ status: 'panding' });
+      this.setState({ status: 'panding', currentPage: 1, images: [] });
       this.reguestImages();
     }
     if (prevState.currentPage !== this.state.currentPage) {
@@ -29,16 +32,27 @@ class ImageGallery extends Component {
       )
         .then(res => res.json())
         .then(res => {
-          this.setState(prevState => ({
-            status: 'resolved',
-            images: [...prevState.images, ...res.hits],
-          }));
+          if (res.hits.length !== 0) {
+            this.setState(prevState => ({
+              status: 'resolved',
+              isLoader: false,
+              images: [...prevState.images, ...res.hits],
+            }));
+            return;
+          }
+          return Promise.reject(new Error('Введені не коректні дані'));
+        })
+        .catch(error => {
+          this.setState({ status: 'rejected', error });
         });
     }, 2000);
   };
 
   loadMore = () => {
-    this.setState(prevState => ({ currentPage: prevState.currentPage + 1 }));
+    this.setState(prevState => ({
+      currentPage: prevState.currentPage + 1,
+      isLoader: true,
+    }));
   };
 
   render() {
@@ -48,11 +62,11 @@ class ImageGallery extends Component {
     }
 
     if (status === 'panding') {
-      return <p>завантаження ...</p>;
+      return <Loader />;
     }
 
     if (status === 'rejected') {
-      return <p>Помилка</p>;
+      return <p>{this.state.error.message}</p>;
     }
 
     if (status === 'resolved') {
@@ -65,7 +79,11 @@ class ImageGallery extends Component {
               </GalleryItem>
             ))}
           </GalleryList>
-          <LoadMore loadMore={this.loadMore}>LoadMore</LoadMore>
+          {this.state.isLoader ? (
+            <Loader />
+          ) : (
+            <LoadMore loadMore={this.loadMore}>LoadMore</LoadMore>
+          )}
         </>
       );
     }

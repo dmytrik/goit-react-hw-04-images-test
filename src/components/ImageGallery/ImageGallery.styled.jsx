@@ -12,6 +12,6 @@ export const GalleryList = styled.ul`
 export const GalleryItem = styled.li`
   margin-left: 20px;
   margin-top: 20px;
-  min-height: 20px;
+  height: 200px;
   flex-basis: calc((100% - 80px) / 4);
 `;
