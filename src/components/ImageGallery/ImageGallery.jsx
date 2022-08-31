@@ -1,4 +1,6 @@
 import React, { Component } from 'react';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import { GalleryList, GalleryItem } from './ImageGallery.styled';
 import ImageGalleryItem from 'components/ImageGalleryItem/ImageGalleryItem';
 import LoadMore from 'components/LoadMore/LoadMore';
@@ -37,10 +39,13 @@ class ImageGallery extends Component {
               status: 'resolved',
               isLoader: false,
               images: [...prevState.images, ...res.hits],
+              error: null,
             }));
             return;
           }
-          return Promise.reject(new Error('Введені не коректні дані'));
+          return Promise.reject(
+            new Error(`За запитом ${this.props.searchName} нічого не знайдено(`)
+          );
         })
         .catch(error => {
           this.setState({ status: 'rejected', error });
@@ -66,7 +71,8 @@ class ImageGallery extends Component {
     }
 
     if (status === 'rejected') {
-      return <p>{this.state.error.message}</p>;
+      toast.error(this.state.error.message);
+      return;
     }
 
     if (status === 'resolved') {
