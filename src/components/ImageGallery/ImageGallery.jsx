@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import propTypes from 'prop-types';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -50,6 +51,7 @@ class ImageGallery extends Component {
           // });
         });
       const images = await fetch.data.hits;
+      console.log(images);
       const countImg = await fetch.data.totalHits;
 
       if (images.length === 0 && this.state.currentPage === 1) {
@@ -113,6 +115,16 @@ class ImageGallery extends Component {
     }));
   };
 
+  openLargeImg = e => {
+    if (e.target.nodeName === 'IMG') {
+      const largeImg = {
+        src: e.target.dataset.large,
+        alt: e.target.alt,
+      };
+      this.props.toggleModal(largeImg);
+    }
+  };
+
   render() {
     const { status } = this.state;
     if (status === 'idle') {
@@ -131,12 +143,18 @@ class ImageGallery extends Component {
     if (status === 'resolved') {
       return (
         <>
-          <GalleryList>
-            {this.state.images.map(({ id, webformatURL, tags }) => (
-              <GalleryItem key={id}>
-                <ImageGalleryItem webformatURL={webformatURL} tags={tags} />
-              </GalleryItem>
-            ))}
+          <GalleryList onClick={this.openLargeImg}>
+            {this.state.images.map(
+              ({ id, webformatURL, tags, largeImageURL }) => (
+                <GalleryItem key={id}>
+                  <ImageGalleryItem
+                    webformatURL={webformatURL}
+                    tags={tags}
+                    largeImg={largeImageURL}
+                  />
+                </GalleryItem>
+              )
+            )}
           </GalleryList>
           {this.state.isLoader && <Loader />}
           {this.state.isLoadMore && (
@@ -149,3 +167,7 @@ class ImageGallery extends Component {
 }
 
 export default ImageGallery;
+ImageGallery.propTypes = {
+  searchName: propTypes.string.isRequired,
+  toggleModal: propTypes.func.isRequired,
+};
