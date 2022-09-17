@@ -1,47 +1,39 @@
-import React, { Component } from 'react';
+import { useState } from 'react';
 import { ToastContainer } from 'react-toastify';
 import Searchbar from './Searchbar/Searchbar';
 import ImageGallery from './ImageGallery/ImageGallery';
 import ImageGalleryItem from './ImageGalleryItem/ImageGalleryItem';
 import Modal from './Modal/Modal';
 
-class App extends Component {
-  state = {
-    searchName: '',
-    showModal: false,
-    largeImg: {},
+export default function App() {
+  // state = {
+  //   searchName: '',
+  //   showModal: false,
+  //   largeImg: {},
+  // };
+
+  const [searchName, setSearchName] = useState('');
+  const [showModal, setShowModal] = useState(false);
+  const [largeImg, setLargeImg] = useState({});
+
+  const changeName = name => {
+    setSearchName(name);
   };
 
-  changeName = name => {
-    this.setState({ searchName: name });
+  const toggleModal = img => {
+    setShowModal(prev => !prev);
+    setLargeImg(img);
   };
-
-  toggleModal = img => {
-    this.setState(prevState => ({
-      showModal: !prevState.showModal,
-      largeImg: img,
-    }));
-  };
-
-  render() {
-    return (
-      <>
-        <Searchbar submitName={this.changeName} />
-        <ImageGallery
-          searchName={this.state.searchName}
-          toggleModal={this.toggleModal}
-        />
-        <ToastContainer />
-        {this.state.showModal && (
-          <Modal toggleModal={this.toggleModal}>
-            <ImageGalleryItem
-              webformatURL={this.state.largeImg.src}
-              tags={this.state.largeImg.alt}
-            />
-          </Modal>
-        )}
-      </>
-    );
-  }
+  return (
+    <>
+      <Searchbar submitName={changeName} />
+      <ImageGallery searchName={searchName} toggleModal={toggleModal} />
+      <ToastContainer />
+      {showModal && (
+        <Modal toggleModal={toggleModal}>
+          <ImageGalleryItem webformatURL={largeImg.src} tags={largeImg.alt} />
+        </Modal>
+      )}
+    </>
+  );
 }
-export default App;
